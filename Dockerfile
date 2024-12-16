@@ -1,36 +1,32 @@
-# Usar uma imagem oficial do PHP com o Apache
-FROM php:8.1-apache
+# Use uma imagem base oficial do PHP
+FROM php:8.2-fpm
 
-# Instalar extensões PHP essenciais
+# Instale extensões do PHP necessárias para o Laravel
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    zlib1g-dev \
     git \
-    unzip \
-    libicu-dev \
+    curl \
+    libpng-dev \
+    libonig-dev \
     libxml2-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql mbstring ctype iconv bcmath opcache
+    zip \
+    unzip \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# Instalar o Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Instale o Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Definir o diretório de trabalho
-WORKDIR /var/www/html
+# Configure o diretório de trabalho
+WORKDIR /var/www
 
-# Copiar o código da aplicação para o container
+# Copie os arquivos para o contêiner
 COPY . .
 
-# Instalar as dependências do Laravel (via Composer)
-RUN composer install --optimize-autoloader --no-dev
+# Configure as permissões para a pasta storage e cache
+RUN chown -R www-data:www-data /var/www \
+    && chmod -R 755 /var/www/storage
 
-# Definir as permissões para os diretórios de armazenamento
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Exponha a porta que o Laravel usará
+EXPOSE 8000
 
-# Expor a porta 80 (padrão do Apache)
-EXPOSE 80
-
-# Definir o comando para iniciar o Apache
-CMD ["apache2-foreground"]
+# Comando para iniciar o Laravel
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
