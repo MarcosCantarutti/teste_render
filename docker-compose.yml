@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: laravel-app
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    networks:
+      - app-network
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_DB: dbteste_wmug
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 5g0uiB2k7xrEhWLfP75YknN77HkHqx70
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
