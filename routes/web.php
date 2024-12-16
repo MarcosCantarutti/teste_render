@@ -15,16 +15,10 @@ Route::get('/test-db', function () {
         
         // Verifique se o usuário foi encontrado
         if ($user) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Conexão com o banco de dados PostgreSQL funcionando!',
-                'user' => $user
-            ]);
+            echo "Primeiro usuario do banco:<b>";
+            dd($user->toArray());
         } else {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Banco de dados conectado, mas nenhum usuário encontrado.'
-            ]);
+            dd(['error' => 'Sem dados a serem exibidos']);
         }
     } catch (\Exception $e) {
         // Se houver erro na conexão, retorna um erro
@@ -34,4 +28,5 @@ Route::get('/test-db', function () {
         ], 500);
     }
 });
+
 
