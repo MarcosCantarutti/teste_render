@@ -1,7 +1,7 @@
-# Use uma imagem base oficial do PHP
+# Use a imagem base oficial do PHP (8.2 FPM) para trabalhar com Laravel
 FROM php:8.2-fpm
 
-# Instale extensões do PHP necessárias para o Laravel
+# Instale extensões do PHP necessárias para o Laravel com PostgreSQL
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -10,9 +10,10 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     zip \
     unzip \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+    libpq-dev \
+    && docker-php-ext-install pdo_pgsql pgsql mbstring exif pcntl bcmath gd
 
-# Instale o Composer
+# Instale o Composer (utilizando a imagem oficial do Composer)
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Configure o diretório de trabalho
@@ -20,6 +21,9 @@ WORKDIR /var/www
 
 # Copie os arquivos para o contêiner
 COPY . .
+
+# Instale as dependências do Composer
+RUN composer install --optimize-autoloader --no-dev
 
 # Configure as permissões para a pasta storage e cache
 RUN chown -R www-data:www-data /var/www \
